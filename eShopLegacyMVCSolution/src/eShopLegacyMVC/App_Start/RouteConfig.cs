@@ -1,19 +1,18 @@
-﻿using System.Web.Routing;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Routing;
 
 namespace eShopLegacyMVC
 {
     public class RouteConfig
     {
-        public static void RegisterRoutes(RouteCollection routes)
+        public static void RegisterRoutes(IApplicationBuilder app)
         {
-            routes.MapMvcAttributeRoutes();
-            routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
-
-            routes.MapRoute(
-                name: "Default",
-                url: "{controller}/{action}/{id}",
-                defaults: new { controller = "Catalog", action = "Index", id = UrlParameter.Optional }
-            );
+            app.UseMvc(routes =>
+            {
+                routes.MapRoute(
+                    name: "default",
+                    template: "{controller=Catalog}/{action=Index}/{id?}");
+            });
         }
     }
 }

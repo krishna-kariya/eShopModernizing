@@ -1,33 +1,43 @@
-﻿using System.Web.Optimization;
+using Microsoft.Extensions.DependencyInjection;
+using System.IO;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.FileProviders;
 
 namespace eShopLegacyMVC
 {
-    public class BundleConfig
+    public class Startup
     {
-        // For more information on bundling, visit https://go.microsoft.com/fwlink/?LinkId=301862
-        public static void RegisterBundles(// TODO Script and style bundling works differently in ASP.NET Core. BundleCollection should be replaced by alternative bundling technologies. For more details see https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification.
-BundleCollection bundles)
+        public static void ConfigureServices(IServiceCollection services)
         {
-            bundles.Add(new ScriptBundle("~/bundles/jquery").Include(
-                        "~/Scripts/jquery-{version}.js"));
+            services.AddMvc();
+        }
 
-            bundles.Add(new ScriptBundle("~/bundles/jqueryval").Include(
-                        "~/Scripts/jquery.validate*"));
+        public static void Configure(IApplicationBuilder app)
+        {
+            app.UseStaticFiles(); // For the wwwroot folder
 
-            // Use the development version of Modernizr to develop with and learn from. Then, when you're
-            // ready for production, use the build tool at https://modernizr.com to pick only the tests you need.
-            bundles.Add(new ScriptBundle("~/bundles/modernizr").Include(
-                        "~/Scripts/modernizr-*"));
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(
+                    Path.Combine(Directory.GetCurrentDirectory(), "Scripts")),
+                RequestPath = "/Scripts"
+            });
 
-            bundles.Add(new ScriptBundle("~/bundles/bootstrap").Include(
-                      "~/Scripts/bootstrap.js",
-                      "~/Scripts/respond.js"));
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(
+                    Path.Combine(Directory.GetCurrentDirectory(), "Content")),
+                RequestPath = "/Content"
+            });
 
-            bundles.Add(new StyleBundle("~/Content/css").Include(
-                      "~/Content/bootstrap.css",
-                      "~/Content/custom.css",
-                      "~/Content/base.css",
-                      "~/Content/site.css"));
+            app.UseRouting();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
+            });
         }
     }
 }
