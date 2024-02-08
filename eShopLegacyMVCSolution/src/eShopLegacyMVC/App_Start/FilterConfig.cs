@@ -1,13 +1,12 @@
-﻿using System.Web;
-using System.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
 
 namespace eShopLegacyMVC
 {
     public class FilterConfig
     {
-        public static void RegisterGlobalFilters(GlobalFilterCollection filters)
+        public static void RegisterGlobalFilters(MvcOptions options)
         {
-            filters.Add(new HandleErrorAttribute());
+            options.Filters.Add(new Microsoft.AspNetCore.Mvc.Diagnostics.ExceptionHandlerPathFeature());
         }
     }
 }

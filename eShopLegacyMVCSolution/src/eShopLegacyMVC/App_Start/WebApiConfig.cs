@@ -1,18 +1,16 @@
-﻿using System.Web.Http;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Routing;
 
 namespace eShopLegacyMVC
 {
     public class WebApiConfig
     {
-        public static void Register(HttpConfiguration config)
+        public static void Register(IEndpointRouteBuilder endpoints)
         {
             // Web API routes
-            config.MapHttpAttributeRoutes();
-
-            config.Routes.MapHttpRoute(
+            endpoints.MapControllerRoute(
                 name: "DefaultApi",
-                routeTemplate: "api/{controller}/{id}",
-                defaults: new { id = RouteParameter.Optional }
+                pattern: "api/{controller}/{id?}"
             );
         }
     }
