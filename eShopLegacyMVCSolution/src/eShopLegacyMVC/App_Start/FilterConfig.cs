@@ -4,9 +4,9 @@ namespace eShopLegacyMVC
 {
     public class FilterConfig
     {
-        public static void RegisterGlobalFilters(MvcOptions options)
+        public static void RegisterGlobalFilters(Microsoft.AspNetCore.Mvc.Filters.FilterCollection filters)
         {
-            options.Filters.Add(new Microsoft.AspNetCore.Mvc.Diagnostics.ExceptionHandlerPathFeature());
+            filters.Add(new Microsoft.AspNetCore.Mvc.Filters.HandleErrorAttribute());
         }
     }
 }

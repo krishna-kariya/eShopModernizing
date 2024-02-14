@@ -1,4 +1,4 @@
-﻿using eShopLegacy.Utilities;
+using eShopLegacy.Utilities;
 using eShopPorted.Services;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -8,26 +8,21 @@ namespace eShopPorted.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class FilesController : Controller
+    public class FilesController : ControllerBase
     {
         private readonly ICatalogService _service;
 
         public FilesController(ICatalogService service)
         {
-            _service = service;
+            _service = service ?? throw new ArgumentNullException(nameof(service));
         }
 
         public IActionResult Index()
         {
             var brands = _service.GetCatalogBrands()
-                .Select(b => new BrandDTO
-                {
-                    Id = b.Id,
-                    Brand = b.Brand
-                }).ToList();
-            var serializer = new Serializing();
+                .Select(b => new BrandDTO(b.Id, b.Brand)).ToList();
 
-            var data = serializer.SerializeBinary(brands);
+            var data = Serializing.SerializeBinary(brands);
 
             return Ok(data);
         }
@@ -37,6 +32,12 @@ namespace eShopPorted.Controllers
         {
             public int Id { get; set; }
             public string Brand { get; set; }
+
+            public BrandDTO(int id, string brand)
+            {
+                Id = id;
+                Brand = brand;
+            }
         }
     }
 }
