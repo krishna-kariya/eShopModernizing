@@ -53,6 +53,8 @@ namespace eShopPorted
                 app.UseExceptionHandler("/Home/Error");
             }
 
+            app.UseSession();
+
             app.UseStaticFiles();
 
             app.UseRouting();

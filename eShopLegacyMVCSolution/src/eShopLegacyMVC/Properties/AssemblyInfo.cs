@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 [assembly: AssemblyTrademark("")]
@@ -11,5 +11,3 @@ using System.Runtime.InteropServices;
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("fdd609f1-1164-407a-9b3c-bfec8c1bdb8c")]
-
-[assembly: log4net.Config.XmlConfigurator(ConfigFile = "log4net.xml")]

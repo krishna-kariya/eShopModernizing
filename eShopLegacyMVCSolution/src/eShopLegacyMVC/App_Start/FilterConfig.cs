@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+/*using Microsoft.AspNetCore.Mvc;
 
 namespace eShopLegacyMVC
 {
@@ -6,7 +6,7 @@ namespace eShopLegacyMVC
     {
         public static void RegisterGlobalFilters(Microsoft.AspNetCore.Mvc.Filters.FilterCollection filters)
         {
-            filters.Add(new Microsoft.AspNetCore.Mvc.Filters.HandleErrorAttribute());
+            filters.Add(new Microsoft.AspNetCore.Mvc.Filters.ExceptionFilterAttribute());
         }
     }
-}
+}*/

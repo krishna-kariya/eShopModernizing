@@ -1,5 +1,5 @@
 using eShopPorted.Services;
-using log4net;
+using Microsoft.Extensions.Logging;
 using System.IO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
@@ -9,22 +9,23 @@ namespace eShopPorted.Controllers
 {
     public class PicController : ControllerBase
     {
-        private static readonly ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static ILogger<PicController> _log;
 
         public const string GetPicRouteName = "GetPicRouteTemplate";
 
         private readonly ICatalogService service;
 
-        public PicController(ICatalogService service)
+        public PicController(ICatalogService service, ILogger<PicController> logger)
         {
             this.service = service;
+            _log = logger;
         }
 
         // GET: Pic/5.png
         [HttpGet("items/{catalogItemId:int}/pic", Name = GetPicRouteName)]
         public IActionResult Index(int catalogItemId)
         {
-            _log.Info($"Now loading... /items/Index?{catalogItemId}/pic");
+            _log.LogInformation("Now loading... /items/Index?{catalogItemId}/pic", catalogItemId);
 
             if (catalogItemId <= 0)
             {

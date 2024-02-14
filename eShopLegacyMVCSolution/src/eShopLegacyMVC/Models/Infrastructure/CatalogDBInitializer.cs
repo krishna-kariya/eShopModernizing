@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data.Entity;
@@ -7,8 +7,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Web;
-using System.Web.Hosting;
+using Microsoft.AspNetCore.Hosting;
 
 namespace eShopLegacyMVC.Models.Infrastructure
 {
@@ -20,13 +19,15 @@ namespace eShopLegacyMVC.Models.Infrastructure
         private const string CatalogBrandHiLoSequenceScript = @"Models\Infrastructure\dbo.catalog_brand_hilo.Sequence.sql";
         private const string CatalogTypeHiLoSequenceScript = @"Models\Infrastructure\dbo.catalog_type_hilo.Sequence.sql";
 
-        private CatalogItemHiLoGenerator indexGenerator;
-        private bool useCustomizationData;
+        private readonly CatalogItemHiLoGenerator indexGenerator;
+        private readonly bool useCustomizationData;
+        private readonly IWebHostEnvironment _env;
 
-        public CatalogDBInitializer(CatalogItemHiLoGenerator indexGenerator)
+        public CatalogDBInitializer(CatalogItemHiLoGenerator indexGenerator, IWebHostEnvironment env)
         {
             this.indexGenerator = indexGenerator;
             useCustomizationData = bool.Parse(ConfigurationManager.AppSettings["UseCustomizationData"]);
+            _env = env;
         }
 
         protected override void Seed(CatalogDBContext context)
@@ -39,7 +40,6 @@ namespace eShopLegacyMVC.Models.Infrastructure
             AddCatalogBrands(context);
             AddCatalogItems(context);
             AddCatalogItemPictures();
-            
         }
 
         private void AddCatalogTypes(CatalogDBContext context)
@@ -94,7 +94,7 @@ namespace eShopLegacyMVC.Models.Infrastructure
 
         private IEnumerable<CatalogType> GetCatalogTypesFromFile()
         {
-            var contentRootPath = HostingEnvironment.ApplicationPhysicalPath;
+            var contentRootPath = _env.ContentRootPath;
             string csvFileCatalogTypes = Path.Combine(contentRootPath, "Setup", "CatalogTypes.csv");
 
             if (!File.Exists(csvFileCatalogTypes))
@@ -113,7 +113,7 @@ namespace eShopLegacyMVC.Models.Infrastructure
                                         .Where(x => x != null);
         }
 
-        static CatalogType CreateCatalogType(string type)
+        private static CatalogType CreateCatalogType(string type)
         {
             type = type.Trim('"').Trim();
 
@@ -128,9 +128,9 @@ namespace eShopLegacyMVC.Models.Infrastructure
             };
         }
 
-        static IEnumerable<CatalogBrand> GetCatalogBrandsFromFile()
+        private IEnumerable<CatalogBrand> GetCatalogBrandsFromFile()
         {
-            var contentRootPath = HostingEnvironment.ApplicationPhysicalPath;
+            var contentRootPath = _env.ContentRootPath;
             string csvFileCatalogBrands = Path.Combine(contentRootPath, "Setup", "CatalogBrands.csv");
 
             if (!File.Exists(csvFileCatalogBrands))
@@ -149,7 +149,7 @@ namespace eShopLegacyMVC.Models.Infrastructure
                                         .Where(x => x != null);
         }
 
-        static CatalogBrand CreateCatalogBrand(string brand)
+        private static CatalogBrand CreateCatalogBrand(string brand)
         {
             brand = brand.Trim('"').Trim();
 
@@ -164,9 +164,9 @@ namespace eShopLegacyMVC.Models.Infrastructure
             };
         }
 
-        static IEnumerable<CatalogItem> GetCatalogItemsFromFile(CatalogDBContext context)
+        private IEnumerable<CatalogItem> GetCatalogItemsFromFile(CatalogDBContext context)
         {
-            var contentRootPath = HostingEnvironment.ApplicationPhysicalPath;
+            var contentRootPath = _env.ContentRootPath;
             string csvFileCatalogItems = Path.Combine(contentRootPath, "Setup", "CatalogItems.csv");
 
             if (!File.Exists(csvFileCatalogItems))
@@ -189,21 +189,21 @@ namespace eShopLegacyMVC.Models.Infrastructure
                         .Where(x => x != null);
         }
 
-        static CatalogItem CreateCatalogItem(string[] column, string[] headers, Dictionary<String, int> catalogTypeIdLookup, Dictionary<String, int> catalogBrandIdLookup)
+        private static CatalogItem CreateCatalogItem(string[] column, string[] headers, Dictionary<String, int> catalogTypeIdLookup, Dictionary<String, int> catalogBrandIdLookup)
         {
-            if (column.Count() != headers.Count())
+            if (column.Length != headers.Length)
             {
-                throw new Exception($"column count '{column.Count()}' not the same as headers count'{headers.Count()}'");
+                throw new Exception($"column count '{column.Length}' not the same as headers count'{headers.Length}'");
             }
 
             string catalogTypeName = column[Array.IndexOf(headers, "catalogtypename")].Trim('"').Trim();
-            if (!catalogTypeIdLookup.ContainsKey(catalogTypeName))
+            if (!catalogTypeIdLookup.TryGetValue(catalogTypeName, out int catalogTypeId))
             {
                 throw new Exception($"type={catalogTypeName} does not exist in catalogTypes");
             }
 
             string catalogBrandName = column[Array.IndexOf(headers, "catalogbrandname")].Trim('"').Trim();
-            if (!catalogBrandIdLookup.ContainsKey(catalogBrandName))
+            if (!catalogBrandIdLookup.TryGetValue(catalogBrandName, out int catalogBrandId))
             {
                 throw new Exception($"type={catalogTypeName} does not exist in catalogTypes");
             }
@@ -214,10 +214,10 @@ namespace eShopLegacyMVC.Models.Infrastructure
                 throw new Exception($"price={priceString}is not a valid decimal number");
             }
 
-            var catalogItem = new CatalogItem()
+            var catalogItem = new CatalogItem
             {
-                CatalogTypeId = catalogTypeIdLookup[catalogTypeName],
-                CatalogBrandId = catalogBrandIdLookup[catalogBrandName],
+                CatalogTypeId = catalogTypeId,
+                CatalogBrandId = catalogBrandId,
                 Description = column[Array.IndexOf(headers, "description")].Trim('"').Trim(),
                 Name = column[Array.IndexOf(headers, "name")].Trim('"').Trim(),
                 Price = price,
@@ -295,20 +295,20 @@ namespace eShopLegacyMVC.Models.Infrastructure
             return catalogItem;
         }
 
-        static string[] GetHeaders(string csvfile, string[] requiredHeaders, string[] optionalHeaders = null)
+        private static string[] GetHeaders(string csvfile, string[] requiredHeaders, string[] optionalHeaders = null)
         {
             string[] csvheaders = File.ReadLines(csvfile).First().ToLowerInvariant().Split(',');
 
-            if (csvheaders.Count() < requiredHeaders.Count())
+            if (csvheaders.Length < requiredHeaders.Length)
             {
-                throw new Exception($"requiredHeader count '{ requiredHeaders.Count()}' is bigger then csv header count '{csvheaders.Count()}' ");
+                throw new Exception($"requiredHeader count '{ requiredHeaders.Length}' is bigger then csv header count '{csvheaders.Length}' ");
             }
 
             if (optionalHeaders != null)
             {
-                if (csvheaders.Count() > (requiredHeaders.Count() + optionalHeaders.Count()))
+                if (csvheaders.Length > (requiredHeaders.Length + optionalHeaders.Length))
                 {
-                    throw new Exception($"csv header count '{csvheaders.Count()}'  is larger then required '{requiredHeaders.Count()}' and optional '{optionalHeaders.Count()}' headers count");
+                    throw new Exception($"csv header count '{csvheaders.Length}'  is larger then required '{requiredHeaders.Length}' and optional '{optionalHeaders.Length}' headers count");
                 }
             }
 
@@ -330,7 +330,7 @@ namespace eShopLegacyMVC.Models.Infrastructure
             return sequenceId;
         }
 
-        private void ExecuteScript(CatalogDBContext context, string scriptFile)
+        private static void ExecuteScript(CatalogDBContext context, string scriptFile)
         {
             var scriptFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, scriptFile);
             context.Database.ExecuteSqlCommand(File.ReadAllText(scriptFilePath));
@@ -342,13 +342,13 @@ namespace eShopLegacyMVC.Models.Infrastructure
             {
                 return;
             }
-            var contentRootPath = HostingEnvironment.ApplicationPhysicalPath;
+            var contentRootPath = _env.ContentRootPath;
             DirectoryInfo picturePath = new DirectoryInfo(Path.Combine(contentRootPath, "Pics"));
             foreach (FileInfo file in picturePath.GetFiles())
             {
                 file.Delete();
             }
-            
+
             string zipFileCatalogItemPictures = Path.Combine(contentRootPath, "Setup", "CatalogItems.zip");
             ZipFile.ExtractToDirectory(zipFileCatalogItemPictures, picturePath.ToString());
         }

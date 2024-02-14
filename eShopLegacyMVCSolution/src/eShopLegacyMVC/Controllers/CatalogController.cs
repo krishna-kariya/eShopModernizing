@@ -2,25 +2,26 @@ using System.Collections.Generic;
 using System.Net;
 using eShopLegacyMVC.Models;
 using eShopLegacyMVC.Services;
-using log4net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.Logging;
 
 namespace eShopLegacyMVC.Controllers
 {
     public class CatalogController : Controller
     {
-        private static readonly ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private readonly ILogger<CatalogController> _log;
         private readonly ICatalogService service;
 
-        public CatalogController(ICatalogService service)
+        public CatalogController(ICatalogService service, ILogger<CatalogController> log)
         {
             this.service = service;
+            _log = log;
         }
 
         public IActionResult Index(int pageSize = 10, int pageIndex = 0)
         {
-            _log.Info($"Now loading... /Catalog/Index?pageSize={pageSize}&pageIndex={pageIndex}");
+            _log.LogInformation($"Now loading... /Catalog/Index?pageSize={pageSize}&pageIndex={pageIndex}");
             var paginatedItems = service.GetCatalogItemsPaginated(pageSize, pageIndex);
             ChangeUriPlaceholder(paginatedItems.Data);
             return View(paginatedItems);
@@ -28,7 +29,7 @@ namespace eShopLegacyMVC.Controllers
 
         public IActionResult Details(int? id)
         {
-            _log.Info($"Now loading... /Catalog/Details?id={id}");
+            _log.LogInformation($"Now loading... /Catalog/Details?id={id}");
             if (id == null)
             {
                 return new StatusCodeResult((int) HttpStatusCode.BadRequest);
@@ -44,7 +45,7 @@ namespace eShopLegacyMVC.Controllers
 
         public IActionResult Create()
         {
-            _log.Info($"Now loading... /Catalog/Create");
+            _log.LogInformation($"Now loading... /Catalog/Create");
             ViewBag.CatalogBrandId = new SelectList(service.GetCatalogBrands(), "Id", "Brand");
             ViewBag.CatalogTypeId = new SelectList(service.GetCatalogTypes(), "Id", "Type");
             return View(new CatalogItem());
@@ -54,7 +55,7 @@ namespace eShopLegacyMVC.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create([Bind("Id,Name,Description,Price,PictureFileName,CatalogTypeId,CatalogBrandId,AvailableStock,RestockThreshold,MaxStockThreshold,OnReorder")] CatalogItem catalogItem)
         {
-            _log.Info($"Now processing... /Catalog/Create?catalogItemName={catalogItem.Name}");
+            _log.LogInformation($"Now processing... /Catalog/Create?catalogItemName={catalogItem.Name}");
             if (ModelState.IsValid)
             {
                 service.CreateCatalogItem(catalogItem);
@@ -67,7 +68,7 @@ namespace eShopLegacyMVC.Controllers
 
         public IActionResult Edit(int? id)
         {
-            _log.Info($"Now loading... /Catalog/Edit?id={id}");
+            _log.LogInformation($"Now loading... /Catalog/Edit?id={id}");
             if (id == null)
             {
                 return new StatusCodeResult((int) HttpStatusCode.BadRequest);
@@ -87,7 +88,7 @@ namespace eShopLegacyMVC.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit([Bind("Id,Name,Description,Price,PictureFileName,CatalogTypeId,CatalogBrandId,AvailableStock,RestockThreshold,MaxStockThreshold,OnReorder")] CatalogItem catalogItem)
         {
-            _log.Info($"Now processing... /Catalog/Edit?id={catalogItem.Id}");
+            _log.LogInformation($"Now processing... /Catalog/Edit?id={catalogItem.Id}");
             if (ModelState.IsValid)
             {
                 service.UpdateCatalogItem(catalogItem);
@@ -100,7 +101,7 @@ namespace eShopLegacyMVC.Controllers
 
         public IActionResult Delete(int? id)
         {
-            _log.Info($"Now loading... /Catalog/Delete?id={id}");
+            _log.LogInformation($"Now loading... /Catalog/Delete?id={id}");
             if (id == null)
             {
                 return new StatusCodeResult((int) HttpStatusCode.BadRequest);
@@ -118,7 +119,7 @@ namespace eShopLegacyMVC.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(int id)
         {
-            _log.Info($"Now processing... /Catalog/DeleteConfirmed?id={id}");
+            _log.LogInformation($"Now processing... /Catalog/DeleteConfirmed?id={id}");
             CatalogItem catalogItem = service.FindCatalogItem(id);
             service.RemoveCatalogItem(catalogItem);
             return RedirectToAction("Index");
@@ -126,7 +127,7 @@ namespace eShopLegacyMVC.Controllers
 
         protected override void Dispose(bool disposing)
         {
-            _log.Debug($"Now disposing");
+            _log.LogInformation($"Now disposing");
             if (disposing)
             {
                 service.Dispose();

@@ -1,11 +1,10 @@
-﻿@model eShopLegacyMVC.Models.CatalogItem
+@model eShopLegacyMVC.Models.CatalogItem
 
 @{
-    ViewBag.Title = "Create";
+    ViewData["Title"] = "Create";
 }
 
 <h2 class="esh-body-title">Create</h2>
-
 
 @using (Html.BeginForm())
 {
@@ -57,8 +56,6 @@
             @Html.LabelFor(model => model.PictureFileName, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-4 esh-form-information">
                 Uploading images not allowed for this version.
-                @*@Html.TextBoxFor(model => model.PictureFileName, new { htmlAttributes = new { @class = "form-control" } })*@
-                @*@Html.ValidationMessageFor(model => model.PictureFileName, "", new { @class = "text-danger" })*@
             </div>
         </div>
 
@@ -100,5 +97,5 @@
 </div>
 
 @section Scripts {
-    @Scripts.Render("~/bundles/jqueryval")
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }
