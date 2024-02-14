@@ -15,7 +15,6 @@
         <div class="container">
             <article class="esh-pager-wrapper row">
                 <nav>
-
                     @if (Model.ActualPage > 0)
                     {
                         @Html.ActionLink("Previous", "Index", new { pageSize = Model.ItemsPerPage, pageIndex = Model.ActualPage - 1 }, new { @class = "esh-pager-item esh-pager-item--navigable" })

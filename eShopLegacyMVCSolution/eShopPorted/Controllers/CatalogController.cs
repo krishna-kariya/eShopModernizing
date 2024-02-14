@@ -20,7 +20,6 @@ namespace eShopPorted.Controllers
             _log = logger;
         }
 
-        // GET /[?pageSize=3&pageIndex=10]
         public ActionResult Index(int pageSize = 10, int pageIndex = 0)
         {
             _log.LogInformation("Now loading... /Catalog/Index?pageSize={0}&pageIndex={1}", pageSize, pageIndex);
@@ -29,7 +28,6 @@ namespace eShopPorted.Controllers
             return View(paginatedItems);
         }
 
-        // GET: Catalog/Details/5
         public ActionResult Details(int? id)
         {
             _log.LogInformation("Now loading... /Catalog/Details?id={0}", id);
@@ -43,11 +41,9 @@ namespace eShopPorted.Controllers
                 return NotFound();
             }
             AddUriPlaceHolder(catalogItem);
-
             return View(catalogItem);
         }
 
-        // GET: Catalog/Create
         public ActionResult Create()
         {
             _log.LogInformation("Now loading... /Catalog/Create");
@@ -92,9 +88,6 @@ namespace eShopPorted.Controllers
             return View(catalogItem);
         }
 
-        // POST: Catalog/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind("Id,Name,Description,Price,PictureFileName,CatalogTypeId,CatalogBrandId,AvailableStock,RestockThreshold,MaxStockThreshold,OnReorder")] CatalogItem catalogItem)
@@ -110,7 +103,6 @@ namespace eShopPorted.Controllers
             return View(catalogItem);
         }
 
-        // GET: Catalog/Delete/5
         public ActionResult Delete(int? id)
         {
             _log.LogInformation("Now loading... /Catalog/Delete?id={0}", id);
@@ -124,11 +116,9 @@ namespace eShopPorted.Controllers
                 return NotFound();
             }
             AddUriPlaceHolder(catalogItem);
-
             return View(catalogItem);
         }
 
-        // POST: Catalog/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
@@ -149,7 +139,7 @@ namespace eShopPorted.Controllers
             base.Dispose(disposing);
         }
 
-        private void ChangeUriPlaceholder(IEnumerable<CatalogItem> items)
+        private static void ChangeUriPlaceholder(IEnumerable<CatalogItem> items)
         {
             foreach (var catalogItem in items)
             {
@@ -157,7 +147,7 @@ namespace eShopPorted.Controllers
             }
         }
 
-        private void AddUriPlaceHolder(CatalogItem item)
+        private static void AddUriPlaceHolder(CatalogItem item)
         {
             item.PictureUri = $"/Pics/{item.Id}.png";
         }

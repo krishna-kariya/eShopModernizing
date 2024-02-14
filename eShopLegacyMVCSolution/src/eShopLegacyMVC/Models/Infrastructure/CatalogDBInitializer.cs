@@ -150,7 +150,7 @@ namespace eShopLegacyMVC.Models.Infrastructure
                                         .Where(x => x != null);
         }
 
-        static CatalogBrand CreateCatalogBrand(string brand)
+        private static CatalogBrand CreateCatalogBrand(string brand)
         {
             brand = brand.Trim('"').Trim();
 
@@ -165,7 +165,7 @@ namespace eShopLegacyMVC.Models.Infrastructure
             };
         }
 
-        static IEnumerable<CatalogItem> GetCatalogItemsFromFile(CatalogDBContext context)
+        private IEnumerable<CatalogItem> GetCatalogItemsFromFile(CatalogDBContext context)
         {
             var contentRootPath = _env.ContentRootPath;
             string csvFileCatalogItems = Path.Combine(contentRootPath, "Setup", "CatalogItems.csv");
@@ -190,7 +190,7 @@ namespace eShopLegacyMVC.Models.Infrastructure
                         .Where(x => x != null);
         }
 
-        static CatalogItem CreateCatalogItem(string[] column, string[] headers, Dictionary<String, int> catalogTypeIdLookup, Dictionary<String, int> catalogBrandIdLookup)
+        private static CatalogItem CreateCatalogItem(string[] column, string[] headers, Dictionary<String, int> catalogTypeIdLookup, Dictionary<String, int> catalogBrandIdLookup)
         {
             if (column.Length != headers.Length)
             {
@@ -296,7 +296,7 @@ namespace eShopLegacyMVC.Models.Infrastructure
             return catalogItem;
         }
 
-        static string[] GetHeaders(string csvfile, string[] requiredHeaders, string[] optionalHeaders = null)
+        private static string[] GetHeaders(string csvfile, string[] requiredHeaders, string[] optionalHeaders = null)
         {
             string[] csvheaders = File.ReadLines(csvfile).First().ToLowerInvariant().Split(',');
 
@@ -331,7 +331,7 @@ namespace eShopLegacyMVC.Models.Infrastructure
             return sequenceId;
         }
 
-        private void ExecuteScript(CatalogDBContext context, string scriptFile)
+        private static void ExecuteScript(CatalogDBContext context, string scriptFile)
         {
             var scriptFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, scriptFile);
             context.Database.ExecuteSqlCommand(File.ReadAllText(scriptFilePath));
