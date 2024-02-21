@@ -19,6 +19,7 @@ namespace eShopLegacyMVC.Controllers
             _log = log;
         }
 
+        // GET /[?pageSize=3&pageIndex=10]
         public IActionResult Index(int pageSize = 10, int pageIndex = 0)
         {
             _log.LogInformation($"Now loading... /Catalog/Index?pageSize={pageSize}&pageIndex={pageIndex}");
@@ -27,6 +28,7 @@ namespace eShopLegacyMVC.Controllers
             return View(paginatedItems);
         }
 
+        // GET: Catalog/Details/5
         public IActionResult Details(int? id)
         {
             _log.LogInformation($"Now loading... /Catalog/Details?id={id}");
@@ -43,6 +45,7 @@ namespace eShopLegacyMVC.Controllers
             return View(catalogItem);
         }
 
+        // GET: Catalog/Create
         public IActionResult Create()
         {
             _log.LogInformation($"Now loading... /Catalog/Create");
@@ -51,6 +54,9 @@ namespace eShopLegacyMVC.Controllers
             return View(new CatalogItem());
         }
 
+        // POST: Catalog/Create
+        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
+        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create([Bind("Id,Name,Description,Price,PictureFileName,CatalogTypeId,CatalogBrandId,AvailableStock,RestockThreshold,MaxStockThreshold,OnReorder")] CatalogItem catalogItem)
@@ -61,11 +67,13 @@ namespace eShopLegacyMVC.Controllers
                 service.CreateCatalogItem(catalogItem);
                 return RedirectToAction("Index");
             }
+
             ViewBag.CatalogBrandId = new SelectList(service.GetCatalogBrands(), "Id", "Brand", catalogItem.CatalogBrandId);
             ViewBag.CatalogTypeId = new SelectList(service.GetCatalogTypes(), "Id", "Type", catalogItem.CatalogTypeId);
             return View(catalogItem);
         }
 
+        // GET: Catalog/Edit/5
         public IActionResult Edit(int? id)
         {
             _log.LogInformation($"Now loading... /Catalog/Edit?id={id}");
@@ -84,6 +92,9 @@ namespace eShopLegacyMVC.Controllers
             return View(catalogItem);
         }
 
+        // POST: Catalog/Edit/5
+        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
+        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Edit([Bind("Id,Name,Description,Price,PictureFileName,CatalogTypeId,CatalogBrandId,AvailableStock,RestockThreshold,MaxStockThreshold,OnReorder")] CatalogItem catalogItem)
@@ -99,6 +110,7 @@ namespace eShopLegacyMVC.Controllers
             return View(catalogItem);
         }
 
+        // GET: Catalog/Delete/5
         public IActionResult Delete(int? id)
         {
             _log.LogInformation($"Now loading... /Catalog/Delete?id={id}");
@@ -112,9 +124,11 @@ namespace eShopLegacyMVC.Controllers
                 return NotFound();
             }
             AddUriPlaceHolder(catalogItem);
+
             return View(catalogItem);
         }
 
+        // POST: Catalog/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(int id)

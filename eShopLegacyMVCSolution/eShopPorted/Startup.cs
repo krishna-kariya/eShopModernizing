@@ -2,6 +2,7 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using eShopPorted.Models;
 using eShopPorted.Modules;
+using eShopPorted.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -25,6 +26,11 @@ namespace eShopPorted
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(30);
+            });
+
             services.AddControllersWithViews();
             bool useMockData = Configuration.GetValue<bool>("UseMockData");
             if (!useMockData)
@@ -34,6 +40,10 @@ namespace eShopPorted
                     options.UseSqlServer(connectionString)
                 );
             }
+            else
+            {
+                services.AddDbContext<CatalogDBContext>();
+            }
 
             // Create Autofac container builder
             var builder = new ContainerBuilder();
@@ -41,6 +51,7 @@ namespace eShopPorted
             builder.RegisterModule(new ApplicationModule(useMockData));
 
             ILifetimeScope container = builder.Build();
+            services.AddScoped<ICatalogService, CatalogService>();
             services.AddSingleton<IServiceProvider>(new AutofacServiceProvider(container));
         }
 
